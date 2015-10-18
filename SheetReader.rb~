@@ -1,5 +1,3 @@
-require 'spreadsheet'
-
 class SheetReader
 
 	def initialize(filename)
