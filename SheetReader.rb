@@ -1,8 +1,10 @@
 require 'spreadsheet'
+require 'mysql2'
+require 'Client'
 
 class SheetReader
 
-	def initialize(filename)
+	def initialize(filename,month,year)
 		
 		#DCL is where we find most of our info (name,services)
 		@DCL_START_ROW = 7
@@ -32,28 +34,21 @@ class SheetReader
 		@clientInfo = @book.worksheet("Client Info")
 		@curDclRow = @dcl.row(@DCL_START_ROW)
 		@curDclRowN = @DCL_START_ROW
+
+		#need to set month and year for the database
+		@month = month
+		@year = year
 	end
 
-	def get_spreadsheet
-		puts "Enter the name of the spreadsheet file: "
-		filename = gets.chomp.strip
-		puts "Trying to open #{filename}"
-		book = Spreadsheet.open(filename) if File.exist?(filename) 
+	def process_sheet
+		c=get_next_client
+		clientNum = 0
+		db = get_database
 
-		while(book.nil? && filename!="") do
-			puts "File not found. Enter with format <filename>.xls (or input nothing to exit): "
-			filename = gets.chomp.strip
-			puts "Trying to open #{filename}"
-			book = Spreadsheet.open(filename) if File.exist?(filename)
+		until(c.nil?) do
+			c=get_next_client
+			db.query("INSERT INTO clients VALUES (#{clientNum},#{c.name},#{c.address},#{c.prov},#{c.email},#{c.totalCost}")
 		end 
-
-		if(filename == "")
-			puts "Program ended (user input)"
-			raise "Program Ended"
-		else 
-			puts "File opened successfully"
-			book
-		end
 	end
 
 	#get information for, and return, the client
@@ -108,5 +103,16 @@ class SheetReader
 	def update_row
 		@curDclRowN+=1
 		@curDclRow = @dcl.row(@curDclRowN)
+	end
+
+	#These finctions relate to the database that SheetReader will store client info in
+
+	def get_database
+		db = Mysql2::Client(:host => 'localhost',:user => 'root',:password => 'abcd0311')
+		db.query("DROP DATABASE #{@month}_#{@year}_clients")
+		db.query("CREATE DATABASE #{@month}_#{@year}_clients")
+		db.query("USE #{@month}_#{@year}_clients")
+		db.query("CREATE TABLE users(cID integer, name varchar(50), address varchar(50), prov varchar(50), email varchar(50), cost float")
+		db
 	end
 end 
