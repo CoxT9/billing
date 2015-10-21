@@ -47,7 +47,8 @@ class SheetReader
 
 		until(c.nil?) do
 			c=get_next_client
-			db.query("INSERT INTO clients VALUES (#{clientNum},#{c.name},#{c.address},#{c.prov},#{c.email},#{c.totalCost}")
+			db.query("INSERT INTO clients VALUES (#{clientNum},'#{c.name}','#{c.address}','#{c.prov}','#{c.postal}','#{c.email}','#{c.totalCost}');")
+			clientNum++;
 		end 
 	end
 
@@ -109,10 +110,16 @@ class SheetReader
 
 	def get_database
 		db = Mysql2::Client(:host => 'localhost',:user => 'root',:password => 'abcd0311')
-		db.query("DROP DATABASE #{@month}_#{@year}_clients")
-		db.query("CREATE DATABASE #{@month}_#{@year}_clients")
+
+		begin
+			db.query("DROP DATABASE #{@month}_#{@year}_clients")
+			db.query("CREATE DATABASE #{@month}_#{@year}_clients")
+		rescue Exception => e
+			db.query("CREATE DATABASE #{@month}_#{@year}_clients")
+		end
+
 		db.query("USE #{@month}_#{@year}_clients")
-		db.query("CREATE TABLE users(cID integer, name varchar(50), address varchar(50), prov varchar(50), email varchar(50), cost float")
+		db.query("CREATE TABLE users(cID integer, name varchar(50), address varchar(50), prov varchar(50), postal varchar(50), email varchar(50), cost float);")
 		db
 	end
 end 
