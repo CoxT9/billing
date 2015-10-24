@@ -1,2 +1,4 @@
-git repo for my billing project, more info to come
+This a a revamp of a billing project I made with a partner for a small business. It was intended to speed up their billing process through the creation of PDF invoices and reciepts, and the mailing of these files.
+OldBilling.rb is the origional program, which used Shoes for the GUI.
+the new version will include an improved GUI using VisualRuby, as well as a new database system. 
 
